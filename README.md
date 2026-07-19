@@ -1,8 +1,9 @@
-# NghiTTS Vercel REST API
+# vercel-tts
 
-One-voice, OpenAI-compatible Vietnamese TTS endpoint for Vercel Node Functions.
-It uses the pinned NghiTTS eSpeak phonemizer WebAssembly bundle and Piper ONNX
-inference through `onnxruntime-web`.
+An OpenAI-compatible Vietnamese text-to-speech API built for Vercel Node
+Functions. `vercel-tts` uses NghiTTS as its TTS backend, including its pinned
+eSpeak phonemizer WebAssembly bundle and Piper ONNX models, with inference
+provided by `onnxruntime-web`.
 
 The home page is an interactive API console and includes request, response,
 model, and model-installation documentation. `GET /v1/tts/models` returns the
@@ -26,5 +27,6 @@ curl -X POST http://localhost:3000/v1/audio/speech \
   --output speech.wav
 ```
 
-Deploy with `npx vercel`. The function is intentionally stateless: changing a
-voice requires a new deployment rather than downloading models at request time.
+Deploy to production with `npx vercel --prod`. The function is intentionally
+stateless: changing a voice requires a new deployment rather than downloading
+models at request time.
