@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Test the NghiTTS Vietnamese speech API in your browser.">
+    <title>NghiTTS API Console</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="NghiTTS API Console home">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span>NghiTTS</span>
+      </a>
+      <span class="header-meta">REST API console</span>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">Vietnamese speech synthesis</p>
+        <h1 id="page-title">Type it. Hear it.</h1>
+        <p>Send text through the same endpoint your application will use.</p>
+      </section>
+
+      <section class="workbench" aria-label="Speech generator">
+        <form id="speech-form">
+          <div class="field text-field">
+            <div class="label-row">
+              <label for="input">Text</label>
+              <span id="character-count">0 / 2,000</span>
+            </div>
+            <textarea id="input" name="input" maxlength="2000" rows="7" required>Xin chào Việt Nam! Hôm nay là một ngày đẹp trời.</textarea>
+            <p class="helper">Vietnamese text works best. Longer input takes more time to synthesize.</p>
+          </div>
+
+          <div class="controls">
+            <div class="field">
+              <label for="model">Model</label>
+              <select id="model" name="model">
+                <option value="default">Ngọc Huyền (mới)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <div class="label-row">
+                <label for="speed">Speed</label>
+                <output id="speed-value" for="speed">1.0x</output>
+              </div>
+              <input id="speed" name="speed" type="range" min="0.5" max="2" step="0.1" value="1">
+            </div>
+
+            <fieldset class="field format-field">
+              <legend>Format</legend>
+              <div class="segment">
+                <label><input type="radio" name="format" value="wav" checked><span>WAV</span></label>
+                <label><input type="radio" name="format" value="pcm"><span>PCM</span></label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div id="error" class="error" role="alert" hidden></div>
+
+          <button id="generate" type="submit">
+            <span class="button-label">Generate speech</span>
+            <span class="button-loading" aria-hidden="true"><i></i><i></i><i></i><span>Generating</span></span>
+          </button>
+        </form>
+
+        <aside class="result" aria-labelledby="result-title">
+          <div class="result-heading">
+            <div>
+              <p class="result-kicker">Output</p>
+              <h2 id="result-title">Ready to listen</h2>
+            </div>
+            <span id="timing" class="timing" hidden></span>
+          </div>
+
+          <div id="empty-state" class="empty-state">
+            <div class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <p>Your generated audio will appear here.</p>
+          </div>
+
+          <div id="audio-result" class="audio-result" hidden>
+            <audio id="audio" controls preload="metadata"></audio>
+            <div class="result-actions">
+              <span id="file-info"></span>
+              <a id="download" href="#">Download audio</a>
+            </div>
+          </div>
+
+          <div class="endpoint">
+            <span>Endpoint</span>
+            <code>POST /v1/audio/speech</code>
+          </div>
+        </aside>
+      </section>
+
+      <section class="documentation" aria-labelledby="docs-title">
+        <div class="docs-intro">
+          <p class="eyebrow">API reference</p>
+          <h2 id="docs-title">Call NghiTTS from your app</h2>
+          <p>The endpoint accepts JSON and returns raw audio bytes. Save the response body directly as an audio file.</p>
+        </div>
+
+        <nav class="docs-nav" aria-label="API documentation sections">
+          <a href="#models">Models</a>
+          <a href="#speech-api">Speech request</a>
+          <a href="#responses">Responses</a>
+          <a href="#install-model">Install a model</a>
+        </nav>
+
+        <div class="docs-body">
+          <article id="models" class="doc-section">
+            <div class="doc-heading">
+              <h3>Available models</h3>
+              <code>GET /v1/tts/models</code>
+            </div>
+            <p>This deployment contains one voice. Both identifiers below select the same model.</p>
+            <div class="model-list" aria-label="Installed models">
+              <div><strong>Ngọc Huyền (mới)</strong><span>Vietnamese voice</span><code>Ngọc Huyền (mới)</code></div>
+              <div><strong>Default alias</strong><span>Resolves to the packaged voice</span><code>default</code></div>
+            </div>
+            <pre><code>curl http://localhost:3000/v1/tts/models</code></pre>
+          </article>
+
+          <article id="speech-api" class="doc-section">
+            <div class="doc-heading">
+              <h3>Generate speech</h3>
+              <code>POST /v1/audio/speech</code>
+            </div>
+            <p>Send an OpenAI-compatible speech request. The response body is the generated audio, not JSON.</p>
+            <pre><code>curl -X POST http://localhost:3000/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "default",
+    "input": "Xin chào Việt Nam!",
+    "voice": "0",
+    "speed": 1.0,
+    "response_format": "wav"
+  }' \
+  --output speech.wav</code></pre>
+            <div class="parameter-grid" aria-label="Speech request fields">
+              <div><code>input</code><strong>string, required</strong><p>Text to synthesize. Maximum 2,000 characters in this console.</p></div>
+              <div><code>model</code><strong>string</strong><p><code>default</code> or the ID returned by <code>GET /v1/tts/models</code>.</p></div>
+              <div><code>speed</code><strong>number</strong><p>Playback speed from 0.25 to 4.0. Default is 1.0.</p></div>
+              <div><code>response_format</code><strong>string</strong><p><code>wav</code> or headerless 16-bit mono <code>pcm</code>.</p></div>
+              <div><code>voice</code><strong>string or number</strong><p>Speaker ID for multi-speaker models. Use <code>0</code> here.</p></div>
+            </div>
+            <p class="note">Long text is split into phrase-sized chunks. The API inserts a short pause between chunks and a final tail so high-speed output does not end abruptly.</p>
+          </article>
+
+          <article id="responses" class="doc-section">
+            <h3>Response formats</h3>
+            <div class="response-grid">
+              <div>
+                <h4>Success</h4>
+                <p>Status <code>200</code> with raw binary audio.</p>
+                <pre><code>Content-Type: audio/wav
+Content-Length: 45100
+
+&lt;binary WAV data&gt;</code></pre>
+              </div>
+              <div>
+                <h4>Error</h4>
+                <p>Status <code>400</code> or <code>405</code> with JSON.</p>
+                <pre><code>{
+  "error": {
+    "message": "input must not be empty",
+    "type": "invalid_request_error"
+  }
+}</code></pre>
+              </div>
+            </div>
+          </article>
+
+          <article id="install-model" class="doc-section install-section">
+            <h3>Install another model</h3>
+            <p>Vercel Functions have no persistent model directory. Choose the voice at build time, then deploy a new immutable function bundle.</p>
+            <ol>
+              <li><strong>List catalog voices</strong><pre><code>curl https://nghitts.app/api/models</code></pre></li>
+              <li><strong>Download a voice locally</strong><pre><code>NGHITTS_VOICE="Ngọc Huyền (mới)" npm run assets</code></pre></li>
+              <li><strong>Build or deploy with that voice</strong><pre><code>NGHITTS_VOICE="Ngọc Huyền (mới)" npx vercel --prod</code></pre></li>
+            </ol>
+            <p class="note">One deployment currently contains one voice. The downloaded files are stored as <code>models/voice.onnx</code> and <code>models/voice.onnx.json</code>.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

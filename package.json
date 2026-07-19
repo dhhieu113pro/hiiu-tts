@@ -1,0 +1,21 @@
+{
+  "name": "nghitts-vercel-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "24.x" },
+  "scripts": {
+    "assets": "node scripts/download-assets.mjs",
+    "build": "npm run assets && tsc --noEmit",
+    "test": "node --test --experimental-strip-types test/*.test.ts"
+  },
+  "dependencies": {
+    "onnxruntime-web": "1.22.0",
+    "phonemizer": "https://raw.githubusercontent.com/nghimestudio/nghitts/46d160da32041f7e176607203b958069265df7da/phonemizer-1.2.2.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  }
+}

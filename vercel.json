@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "functions": {
+    "api/v1/audio/speech.ts": {
+      "maxDuration": 60,
+      "memory": 2048,
+      "includeFiles": "{models/**,node_modules/onnxruntime-web/dist/*.wasm}"
+    },
+    "api/v1/tts/models.ts": {
+      "includeFiles": "models/voice.name"
+    }
+  },
+  "rewrites": [
+    { "source": "/v1/audio/speech", "destination": "/api/v1/audio/speech" },
+    { "source": "/v1/tts", "destination": "/api/v1/audio/speech" },
+    { "source": "/v1/tts/models", "destination": "/api/v1/tts/models" }
+  ]
+}
