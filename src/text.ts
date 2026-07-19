@@ -36,7 +36,40 @@ export function normalizeVietnamese(input: string): string {
     .replace(/(\d+)\s*%/g, (_, number) => `${numberToWords(+number)} phần trăm`)
     .replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/g, (_, day, month, year) => `ngày ${numberToWords(+day)} tháng ${numberToWords(+month)} năm ${numberToWords(+year)}`)
     .replace(/\b\d+\b/g, value => numberToWords(+value))
-    .replace(/\s+/g, " ").trim().toLowerCase();
+    .replace(/\s+/g, " ").trim();
+}
+
+export interface LanguageSegment {
+  text: string;
+  voice: "vi" | "en-us";
+}
+
+/**
+ * Split text into phonemizer runs without pretending that every ASCII word is
+ * English (many Vietnamese words are ASCII too). Explicit [en] tags are the
+ * reliable option; camel-case brand names and acronyms are safe auto-detects.
+ */
+export function splitLanguageSegments(input: string): LanguageSegment[] {
+  const segments: LanguageSegment[] = [];
+  const taggedOrEnglishName = /\[en\]([\s\S]*?)\[\/en\]|\[vi\]([\s\S]*?)\[\/vi\]|\b(?:[A-Z]{2,}|[A-Z][a-z]+[A-Z][A-Za-z]*)\b/g;
+  let at = 0;
+
+  const push = (text: string, voice: LanguageSegment["voice"]) => {
+    if (!text) return;
+    const previous = segments.at(-1);
+    if (previous?.voice === voice) previous.text += text;
+    else segments.push({ text, voice });
+  };
+
+  for (const match of input.matchAll(taggedOrEnglishName)) {
+    push(input.slice(at, match.index), "vi");
+    if (match[1] !== undefined) push(match[1], "en-us");
+    else if (match[2] !== undefined) push(match[2], "vi");
+    else push(match[0], "en-us");
+    at = match.index + match[0].length;
+  }
+  push(input.slice(at), "vi");
+  return segments;
 }
 
 export function chunkText(text: string, maxLength = 160): string[] {

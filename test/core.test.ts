@@ -1,11 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { encodeWav } from "../src/audio.ts";
-import { chunkText, normalizeVietnamese } from "../src/text.ts";
+import { chunkText, normalizeVietnamese, splitLanguageSegments } from "../src/text.ts";
 
 test("normalizes basic Vietnamese numbers, dates and percentages", () => {
   assert.equal(normalizeVietnamese("Xin chào 18/7/2026, đạt 6,5%!"),
-    "xin chào ngày mười tám tháng bảy năm hai nghìn không trăm hai mươi sáu, đạt sáu phẩy năm phần trăm!");
+    "Xin chào ngày mười tám tháng bảy năm hai nghìn không trăm hai mươi sáu, đạt sáu phẩy năm phần trăm!");
+});
+
+test("splits explicit and obvious English names from Vietnamese", () => {
+  assert.deepEqual(splitLanguageSegments("Xin chào OpenAI và [en]Apple iPhone[/en]."), [
+    { text: "Xin chào ", voice: "vi" },
+    { text: "OpenAI", voice: "en-us" },
+    { text: " và ", voice: "vi" },
+    { text: "Apple iPhone", voice: "en-us" },
+    { text: ".", voice: "vi" }
+  ]);
 });
 
 test("chunks sentences and adds terminal punctuation", () => {

@@ -3,7 +3,7 @@ import { join } from "node:path";
 import * as ort from "onnxruntime-web";
 import { phonemize } from "phonemizer";
 import { encodePcm16, encodeWav, normalize } from "./audio.js";
-import { chunkText, normalizeVietnamese } from "./text.js";
+import { chunkText, normalizeVietnamese, splitLanguageSegments } from "./text.js";
 import type { SpeechRequest, VoiceConfig } from "./types.js";
 
 const projectRoot = process.cwd();
@@ -57,8 +57,12 @@ export async function synthesize(request: SpeechRequest): Promise<{ data: Uint8A
   const finalTail = Math.round(sampleRate * 0.2);
   for (let index = 0; index < chunks.length; index++) {
     const chunk = chunks[index];
-    const clauses = await phonemize(chunk, config.espeak?.voice || "vi");
-    const ids = phonemeIds(clauses.join("\r\n").replace(/\((?:en|vi)\)/gi, ""), config);
+    const phonemes: string[] = [];
+    for (const segment of splitLanguageSegments(chunk)) {
+      const clauses = await phonemize(segment.text, segment.voice === "en-us" ? "en-us" : (config.espeak?.voice || "vi"));
+      phonemes.push(clauses.join("\r\n"));
+    }
+    const ids = phonemeIds(phonemes.join(" ").replace(/\((?:en|vi)\)/gi, ""), config);
     const feeds: Record<string, ort.Tensor> = {
       input: new ort.Tensor("int64", BigInt64Array.from(ids), [1, ids.length]),
       input_lengths: new ort.Tensor("int64", BigInt64Array.from([BigInt(ids.length)]), [1]),
