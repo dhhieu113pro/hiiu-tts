@@ -2,7 +2,7 @@
 
 An OpenAI-compatible Vietnamese text-to-speech API built for Netlify and Vercel Serverless/Edge Functions. `hiiu-tts` uses NghiTTS as its TTS backend, including its pinned eSpeak phonemizer WebAssembly bundle and Piper ONNX models, with inference provided by `onnxruntime-web`.
 
-The home page (`https://hiiu-tts.netlify.app/`) serves as an interactive API console and includes request, response, and model documentation.
+The home page (`https://hiiu-tts.vercel.app/`) serves as an interactive API console and includes request, response, and model documentation.
 
 ## Features
 
@@ -27,12 +27,12 @@ The build command downloads the default `Ngọc Huyền (mới)` voice model int
 
 ### List available models
 ```bash
-curl https://hiiu-tts.netlify.app/v1/tts/models
+curl https://hiiu-tts.vercel.app/v1/tts/models
 ```
 
 ### Generate speech
 ```bash
-curl -X POST https://hiiu-tts.netlify.app/v1/audio/speech \
+curl -X POST https://hiiu-tts.vercel.app/v1/audio/speech \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "Ngọc Huyền (mới)",

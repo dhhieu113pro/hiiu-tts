@@ -171,7 +171,7 @@ Cuộc chạy đua thiết kế viền mỏng sau đó đã đẩy tỷ lệ nà
               <div><strong>Ngọc Huyền (mới)</strong><span>Default (Pre-bundled)</span><code>Ngọc Huyền (mới)</code></div>
               <div><strong>19 Other Voices</strong><span>Cached dynamically</span><code>(e.g., Ban Mai, Duy Oryx, etc.)</code></div>
             </div>
-            <pre><code>curl https://hiiu-tts.netlify.app/v1/tts/models</code></pre>
+            <pre><code>curl https://hiiu-tts.vercel.app/v1/tts/models</code></pre>
           </article>
 
           <article id="speech-api" class="doc-section">
@@ -180,7 +180,7 @@ Cuộc chạy đua thiết kế viền mỏng sau đó đã đẩy tỷ lệ nà
               <code>POST /v1/audio/speech</code>
             </div>
             <p>Send an OpenAI-compatible speech request. The response body is the generated audio, not JSON.</p>
-            <pre><code>curl -X POST https://hiiu-tts.netlify.app/v1/audio/speech \
+            <pre><code>curl -X POST https://hiiu-tts.vercel.app/v1/audio/speech \
   -H "Content-Type: application/json" \
   -d '{
     "model": "Ngọc Huyền (mới)",
