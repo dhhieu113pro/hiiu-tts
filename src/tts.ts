@@ -1,5 +1,8 @@
-import { readFile } from "node:fs/promises";
+import { readFileSync, existsSync, createWriteStream } from "node:fs";
+import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { pipeline } from "node:stream/promises";
+import { Readable } from "node:stream";
 import * as ort from "onnxruntime-web";
 import { phonemize } from "phonemizer";
 import { encodePcm16, encodeWav, normalize } from "./audio.js";
@@ -7,47 +10,72 @@ import { chunkText, normalizeVietnamese, splitLanguageSegments } from "./text.js
 import type { SpeechRequest, VoiceConfig } from "./types.js";
 
 const projectRoot = process.cwd();
-const modelPath = join(projectRoot, "models", "voice.onnx");
-const configPath = join(projectRoot, "models", "voice.onnx.json");
 const wasmRoot = join(projectRoot, "node_modules", "onnxruntime-web", "dist") + "/";
 ort.env.wasm.wasmPaths = wasmRoot;
 ort.env.wasm.numThreads = 1;
 
-let runtime: Promise<{ session: ort.InferenceSession; config: VoiceConfig; name: string }> | undefined;
+const modelsDir = (process.env.NETLIFY || process.env.LAMBDA_TASK_ROOT) 
+  ? "/tmp/models" 
+  : join(projectRoot, "models");
 
-async function loadRuntime() {
-  const [model, rawConfig, name] = await Promise.all([
-    readFile(modelPath), readFile(configPath, "utf8"), readFile(join(projectRoot, "models", "voice.name"), "utf8")
+const runtimes = new Map<string, Promise<{ session: ort.InferenceSession; config: VoiceConfig; name: string }>>();
+
+async function downloadAsset(url: string, destPath: string) {
+  const response = await fetch(url);
+  if (!response.ok || !response.body) throw new Error(`Failed to download ${url}: ${response.statusText}`);
+  await pipeline(Readable.fromWeb(response.body as any), createWriteStream(destPath));
+}
+
+async function ensureModelDownloaded(voice: string): Promise<{ modelPath: string; configPath: string }> {
+  // First, check if the model exists in the local packaged models folder
+  const localModelPath = join(projectRoot, "models", "voice.onnx");
+  const localConfigPath = join(projectRoot, "models", "voice.onnx.json");
+  const localNamePath = join(projectRoot, "models", "voice.name");
+  
+  if (existsSync(localNamePath)) {
+    const localName = readFileSync(localNamePath, "utf8").trim();
+    if ((localName === voice || voice === "default") && existsSync(localModelPath) && existsSync(localConfigPath)) {
+      return { modelPath: localModelPath, configPath: localConfigPath };
+    }
+  }
+
+  // Fallback to /tmp/models or project models/ folder for other voices
+  await mkdir(modelsDir, { recursive: true });
+  const mPath = join(modelsDir, `${voice}.onnx`);
+  const cPath = join(modelsDir, `${voice}.onnx.json`);
+  
+  if (!existsSync(mPath) || !existsSync(cPath)) {
+    const encoded = encodeURIComponent(voice);
+    await Promise.all([
+      downloadAsset(`https://nghitts.app/api/model/${encoded}.onnx`, mPath),
+      downloadAsset(`https://nghitts.app/api/model/${encoded}.onnx.json`, cPath)
+    ]);
+  }
+  return { modelPath: mPath, configPath: cPath };
+}
+
+async function loadRuntime(voice: string) {
+  const { modelPath, configPath } = await ensureModelDownloaded(voice);
+  const [model, rawConfig] = await Promise.all([
+    readFile(modelPath), readFile(configPath, "utf8")
   ]);
   const config = JSON.parse(rawConfig) as VoiceConfig;
   const session = await ort.InferenceSession.create(model, { executionProviders: ["wasm"] });
-  return { session, config, name: name.trim() };
-}
-
-function phonemeIds(text: string, config: VoiceConfig): bigint[] {
-  const result: bigint[] = [];
-  const add = (symbol: string) => config.phoneme_id_map[symbol]?.forEach(id => result.push(BigInt(id)));
-  add("^"); add("_");
-  for (const symbol of Array.from(text.normalize("NFD"))) { add(symbol); add("_"); }
-  add("$");
-  return result;
-}
-
-function speakerId(value: string | number | undefined, config: VoiceConfig): number {
-  if (value === undefined || value === "") return 0;
-  const numeric = Number(value);
-  if (Number.isInteger(numeric)) return numeric;
-  const mapped = config.speaker_id_map?.[String(value)];
-  if (mapped === undefined) throw new Error(`Unknown speaker '${value}'`);
-  return mapped;
+  return { session, config, name: voice };
 }
 
 export async function synthesize(request: SpeechRequest): Promise<{ data: Uint8Array; type: string }> {
   if (!request.input?.trim()) throw new Error("input must not be empty");
   const speed = request.speed ?? 1;
   if (speed < 0.25 || speed > 4) throw new Error("speed must be between 0.25 and 4.0");
-  const loaded = await (runtime ??= loadRuntime());
-  if (request.model && !["default", loaded.name].includes(request.model)) throw new Error(`Only model '${loaded.name}' is installed`);
+
+  const voiceName = request.model && request.model !== "default" ? request.model : "Ngọc Huyền (mới)";
+  let runtimePromise = runtimes.get(voiceName);
+  if (!runtimePromise) {
+    runtimePromise = loadRuntime(voiceName);
+    runtimes.set(voiceName, runtimePromise);
+  }
+  const loaded = await runtimePromise;
   const { session, config } = loaded;
   const chunks = chunkText(normalizeVietnamese(request.input));
   const output: Float32Array[] = [];

@@ -17,9 +17,10 @@ let audioUrl;
 fetch("/v1/tts/models")
   .then(response => response.ok ? response.json() : Promise.reject())
   .then(({ data }) => {
-    const model = data?.[0];
-    if (!model) return;
-    document.querySelector("#model").innerHTML = `<option value="${model.id}">${model.id}</option>`;
+    if (!data || data.length === 0) return;
+    document.querySelector("#model").innerHTML = data
+      .map(model => `<option value="${model.id}">${model.id}</option>`)
+      .join("");
   })
   .catch(() => {});
 
