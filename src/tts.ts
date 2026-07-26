@@ -64,6 +64,24 @@ async function loadRuntime(voice: string) {
   return { session, config, name: voice };
 }
 
+function phonemeIds(text: string, config: VoiceConfig): bigint[] {
+  const result: bigint[] = [];
+  const add = (symbol: string) => config.phoneme_id_map[symbol]?.forEach(id => result.push(BigInt(id)));
+  add("^"); add("_");
+  for (const symbol of Array.from(text.normalize("NFD"))) { add(symbol); add("_"); }
+  add("$");
+  return result;
+}
+
+function speakerId(value: string | number | undefined, config: VoiceConfig): number {
+  if (value === undefined || value === "") return 0;
+  const numeric = Number(value);
+  if (Number.isInteger(numeric)) return numeric;
+  const mapped = config.speaker_id_map?.[String(value)];
+  if (mapped === undefined) throw new Error(`Unknown speaker '${value}'`);
+  return mapped;
+}
+
 export async function synthesize(request: SpeechRequest): Promise<{ data: Uint8Array; type: string }> {
   if (!request.input?.trim()) throw new Error("input must not be empty");
   const speed = request.speed ?? 1;
