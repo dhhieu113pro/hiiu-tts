@@ -1,13 +1,21 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 export default (request: Request): Response => {
-  if (request.method !== "GET") {
-    return Response.json({ error: { message: "Method not allowed", type: "invalid_request_error" } }, { status: 405 });
+  try {
+    const cwd = process.cwd();
+    const contents = readdirSync(cwd);
+    const hasModels = existsSync(join(cwd, "models"));
+    const modelsContents = hasModels ? readdirSync(join(cwd, "models")) : [];
+    
+    return Response.json({
+      cwd,
+      contents,
+      hasModels,
+      modelsContents,
+      error: null
+    });
+  } catch (err: any) {
+    return Response.json({ error: err.message }, { status: 500 });
   }
-  const name = readFileSync(join(process.cwd(), "models", "voice.name"), "utf8").trim();
-  return Response.json({
-    object: "list",
-    data: [{ id: name, object: "model", owned_by: "nghitts", aliases: ["default"] }]
-  });
 };
