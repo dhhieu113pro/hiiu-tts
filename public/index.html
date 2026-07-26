@@ -158,7 +158,6 @@ Cuộc chạy đua thiết kế viền mỏng sau đó đã đẩy tỷ lệ nà
           <a href="#models">Models</a>
           <a href="#speech-api">Speech request</a>
           <a href="#responses">Responses</a>
-          <a href="#install-model">Install a model</a>
         </nav>
 
         <div class="docs-body">
@@ -221,17 +220,6 @@ Content-Length: 45100
 }</code></pre>
               </div>
             </div>
-          </article>
-
-          <article id="install-model" class="doc-section install-section">
-            <h3>Install another model</h3>
-            <p>Vercel Functions have no persistent model directory. Choose the voice at build time, then deploy a new immutable function bundle.</p>
-            <ol>
-              <li><strong>List catalog voices</strong><pre><code>curl https://nghitts.app/api/models</code></pre></li>
-              <li><strong>Download a voice locally</strong><pre><code>NGHITTS_VOICE="Ngọc Huyền (mới)" npm run assets</code></pre></li>
-              <li><strong>Build or deploy with that voice</strong><pre><code>NGHITTS_VOICE="Ngọc Huyền (mới)" npx vercel --prod</code></pre></li>
-            </ol>
-            <p class="note">One deployment currently contains one voice. The downloaded files are stored as <code>models/voice.onnx</code> and <code>models/voice.onnx.json</code>.</p>
           </article>
         </div>
       </section>
