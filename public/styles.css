@@ -317,3 +317,23 @@ html[data-theme="dark"] button:hover {
   .model-list, .parameter-grid, .response-grid { grid-template-columns: 1fr; }
   .parameter-grid > div:last-child { grid-column: auto; }
 }
+
+/* Site Footer */
+.site-footer {
+  max-width: 1220px;
+  margin: 64px auto 0;
+  padding: 40px 30px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.site-footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+}
+.site-footer a:hover {
+  text-decoration: underline;
+}
