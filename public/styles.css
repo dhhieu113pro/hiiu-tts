@@ -23,6 +23,9 @@ button, textarea, select, input { font: inherit; }
 .brand { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -.02em; }
 .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; color: #f7fbf8; background: var(--accent); font-size: 15px; }
 .header-meta { color: var(--muted); font-size: 13px; }
+.header-right { display: flex; align-items: center; gap: 20px; }
+.github-link { color: var(--ink); opacity: .7; transition: opacity .18s ease; display: inline-flex; align-items: center; }
+.github-link:hover { opacity: 1; }
 
 main { max-width: 1220px; margin: auto; padding: 62px 30px 80px; }
 .intro { max-width: 680px; margin-bottom: 42px; }

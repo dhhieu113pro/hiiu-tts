@@ -15,7 +15,12 @@
         <span class="brand-mark" aria-hidden="true">N</span>
         <span>NghiTTS</span>
       </a>
-      <span class="header-meta">REST API console</span>
+      <div class="header-right">
+        <span class="header-meta">REST API console</span>
+        <a class="github-link" href="https://github.com/dhhieu113pro/vercel-tts" target="_blank" rel="noopener" aria-label="GitHub Repository">
+          <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+      </div>
     </header>
 
     <main>
@@ -136,12 +141,12 @@
               <h3>Available models</h3>
               <code>GET /v1/tts/models</code>
             </div>
-            <p>This deployment contains one voice. Both identifiers below select the same model.</p>
+            <p>This deployment supports all 20 voice models from NghiTTS, downloaded and cached dynamically at runtime.</p>
             <div class="model-list" aria-label="Installed models">
-              <div><strong>Ngọc Huyền (mới)</strong><span>Vietnamese voice</span><code>Ngọc Huyền (mới)</code></div>
-              <div><strong>Default alias</strong><span>Resolves to the packaged voice</span><code>default</code></div>
+              <div><strong>Ngọc Huyền (mới)</strong><span>Default (Pre-bundled)</span><code>Ngọc Huyền (mới)</code></div>
+              <div><strong>19 Other Voices</strong><span>Cached dynamically</span><code>(e.g., Ban Mai, Duy Oryx, etc.)</code></div>
             </div>
-            <pre><code>curl http://localhost:3000/v1/tts/models</code></pre>
+            <pre><code>curl https://hiiu-tts.netlify.app/v1/tts/models</code></pre>
           </article>
 
           <article id="speech-api" class="doc-section">
@@ -150,10 +155,10 @@
               <code>POST /v1/audio/speech</code>
             </div>
             <p>Send an OpenAI-compatible speech request. The response body is the generated audio, not JSON.</p>
-            <pre><code>curl -X POST http://localhost:3000/v1/audio/speech \
+            <pre><code>curl -X POST https://hiiu-tts.netlify.app/v1/audio/speech \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "default",
+    "model": "Ngọc Huyền (mới)",
     "input": "Xin chào Việt Nam!",
     "voice": "0",
     "speed": 1.0,
@@ -161,8 +166,8 @@
   }' \
   --output speech.wav</code></pre>
             <div class="parameter-grid" aria-label="Speech request fields">
-              <div><code>input</code><strong>string, required</strong><p>Text to synthesize. Maximum 2,000 characters in this console.</p></div>
-              <div><code>model</code><strong>string</strong><p><code>default</code> or the ID returned by <code>GET /v1/tts/models</code>.</p></div>
+              <div><code>input</code><strong>string, required</strong><p>Text to synthesize. Maximum 500 characters in this console to prevent timeout.</p></div>
+              <div><code>model</code><strong>string</strong><p>Any of the 20 model names returned by <code>GET /v1/tts/models</code> (e.g. <code>Ban Mai</code>).</p></div>
               <div><code>speed</code><strong>number</strong><p>Playback speed from 0.25 to 4.0. Default is 1.0.</p></div>
               <div><code>response_format</code><strong>string</strong><p><code>wav</code> or headerless 16-bit mono <code>pcm</code>.</p></div>
               <div><code>voice</code><strong>string or number</strong><p>Speaker ID for multi-speaker models. Use <code>0</code> here.</p></div>
