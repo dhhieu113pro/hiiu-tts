@@ -199,32 +199,38 @@ form.addEventListener("submit", async event => {
 
     // Chunk size is set to 300 to balance speed, synthesis quality and timeout limits
     const chunks = splitTextIntoChunks(text, 300);
-    const wavBuffers = [];
+    
+    if (chunks.length > 1) {
+      resultTitle.textContent = `Generating audio (${chunks.length} parts in parallel)...`;
+    } else {
+      resultTitle.textContent = "Generating audio...";
+    }
 
-    for (let i = 0; i < chunks.length; i++) {
-      if (chunks.length > 1) {
-        resultTitle.textContent = `Generating audio (part ${i + 1} of ${chunks.length})`;
-      }
-      
+    const modelValue = document.querySelector("#model").value;
+    const speedValue = Number(speed.value);
+
+    // Launch all requests in parallel
+    const promises = chunks.map(async (chunk, index) => {
       const response = await fetch("/v1/audio/speech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: document.querySelector("#model").value,
-          input: chunks[i],
-          speed: Number(speed.value),
+          model: modelValue,
+          input: chunk,
+          speed: speedValue,
           response_format: format
         })
       });
 
       if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.error?.message || `Request for part ${i + 1} failed with status ${response.status}`);
+        throw new Error(body?.error?.message || `Part ${index + 1} failed: ${response.status}`);
       }
 
-      const arrayBuffer = await response.arrayBuffer();
-      wavBuffers.push(arrayBuffer);
-    }
+      return response.arrayBuffer();
+    });
+
+    const wavBuffers = await Promise.all(promises);
 
     let blob;
     if (format === "wav") {
