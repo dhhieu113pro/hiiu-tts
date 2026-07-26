@@ -18,6 +18,16 @@ test("splits explicit and obvious English names from Vietnamese", () => {
   ]);
 });
 
+test("detects ordinary English sentences", () => {
+  const input = "Your original example may work automatically, but tags are recommended for consistent production results.";
+  assert.deepEqual(splitLanguageSegments(input), [{ text: input, voice: "en-us" }]);
+});
+
+test("keeps accented Vietnamese sentences Vietnamese", () => {
+  const input = "Đây là một câu tiếng Việt có đầy đủ dấu.";
+  assert.deepEqual(splitLanguageSegments(input), [{ text: input, voice: "vi" }]);
+});
+
 test("chunks sentences and adds terminal punctuation", () => {
   assert.deepEqual(chunkText("xin chào. hôm nay đẹp trời"), ["xin chào.", "hôm nay đẹp trời."]);
 });

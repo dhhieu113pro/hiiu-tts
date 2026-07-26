@@ -23,7 +23,7 @@ fetch("/v1/tts/models")
   })
   .catch(() => {});
 
-function updateCount() { count.textContent = `${input.value.length.toLocaleString()} / 2,000`; }
+function updateCount() { count.textContent = `${input.value.length.toLocaleString()} / 500`; }
 function updateSpeed() { speedValue.textContent = `${Number(speed.value).toFixed(1)}x`; }
 input.addEventListener("input", updateCount);
 speed.addEventListener("input", updateSpeed);

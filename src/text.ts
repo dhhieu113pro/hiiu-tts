@@ -44,6 +44,22 @@ export interface LanguageSegment {
   voice: "vi" | "en-us";
 }
 
+const englishHints = new Set([
+  "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "from",
+  "has", "have", "he", "her", "his", "i", "if", "in", "is", "it", "may",
+  "not", "of", "on", "or", "our", "she", "should", "that", "the", "their",
+  "they", "this", "to", "was", "we", "were", "will", "with", "you", "your"
+]);
+
+function defaultSegmentVoice(text: string): LanguageSegment["voice"] {
+  // Accented Vietnamese is decisive. Unaccented text stays Vietnamese unless
+  // several common English grammar words make an English sentence clear.
+  if (/[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/iu.test(text)) return "vi";
+  const words = text.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g) ?? [];
+  const englishScore = words.reduce((score, word) => score + Number(englishHints.has(word)), 0);
+  return englishScore >= 2 ? "en-us" : "vi";
+}
+
 /**
  * Split text into phonemizer runs without pretending that every ASCII word is
  * English (many Vietnamese words are ASCII too). Explicit [en] tags are the
@@ -62,13 +78,15 @@ export function splitLanguageSegments(input: string): LanguageSegment[] {
   };
 
   for (const match of input.matchAll(taggedOrEnglishName)) {
-    push(input.slice(at, match.index), "vi");
+    const before = input.slice(at, match.index);
+    push(before, defaultSegmentVoice(before));
     if (match[1] !== undefined) push(match[1], "en-us");
     else if (match[2] !== undefined) push(match[2], "vi");
     else push(match[0], "en-us");
     at = match.index + match[0].length;
   }
-  push(input.slice(at), "vi");
+  const tail = input.slice(at);
+  push(tail, defaultSegmentVoice(tail));
   return segments;
 }
 

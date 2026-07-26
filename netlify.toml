@@ -1,0 +1,20 @@
+[build]
+  publish = "public"
+
+[functions]
+  included_files = ["models/**", "node_modules/onnxruntime-web/dist/*.wasm"]
+
+[[redirects]]
+  from = "/v1/audio/speech"
+  to = "/.netlify/functions/speech"
+  status = 200
+
+[[redirects]]
+  from = "/v1/tts"
+  to = "/.netlify/functions/speech"
+  status = 200
+
+[[redirects]]
+  from = "/v1/tts/models"
+  to = "/.netlify/functions/models"
+  status = 200
