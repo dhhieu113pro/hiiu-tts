@@ -3,5 +3,6 @@ models/*.onnx
 models/*.onnx.json
 models/voice.name
 *.wav
+!public/audio/demos/*.wav
 .vercel/
 .vercel
