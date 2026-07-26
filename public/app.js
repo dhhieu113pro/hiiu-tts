@@ -12,6 +12,16 @@ const download = document.querySelector("#download");
 const fileInfo = document.querySelector("#file-info");
 const timing = document.querySelector("#timing");
 const resultTitle = document.querySelector("#result-title");
+const themeToggle = document.querySelector("#theme-toggle");
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const nextTheme = isDark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    localStorage.setItem("theme", nextTheme);
+  });
+}
+
 let audioUrl;
 
 fetch("/v1/tts/models")
@@ -41,7 +51,6 @@ let currentPlayingAudio = null;
 let currentPlayingBtn = null;
 
 function setupDemoHandlers() {
-  const sampleText = document.querySelector("#demo-sample-text").textContent;
   const playButtons = document.querySelectorAll(".demo-play-btn");
 
   playButtons.forEach(btn => {
@@ -59,40 +68,31 @@ function setupDemoHandlers() {
       btn.innerHTML = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8z"/></svg>`;
 
       try {
-        const response = await fetch("/v1/audio/speech", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: voice,
-            input: sampleText,
-            speed: 1.0,
-            response_format: "wav"
-          })
-        });
-
-        if (!response.ok) throw new Error("Synthesis failed");
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-
+        const url = `/audio/demos/${encodeURIComponent(voice)}.wav`;
         const audio = new Audio(url);
         currentPlayingAudio = audio;
         currentPlayingBtn = btn;
 
-        btn.disabled = false;
-        btn.classList.remove("loading");
-        btn.classList.add("playing");
-        btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+        audio.addEventListener("playing", () => {
+          btn.disabled = false;
+          btn.classList.remove("loading");
+          btn.classList.add("playing");
+          btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+        });
 
         audio.addEventListener("ended", () => {
+          stopCurrentDemo();
+        });
+
+        audio.addEventListener("error", (e) => {
+          console.error("Audio error:", e);
           stopCurrentDemo();
         });
 
         await audio.play();
       } catch (err) {
         console.error(err);
-        btn.disabled = false;
-        btn.classList.remove("loading");
-        btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+        stopCurrentDemo();
       }
     });
   });

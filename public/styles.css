@@ -238,9 +238,58 @@ code { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
 
 @keyframes pulse { from { transform: scaleY(.5); } to { transform: scaleY(1); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }
-@media (prefers-color-scheme: dark) {
-  :root { color-scheme: dark; --page: #111713; --surface: #171f1a; --surface-strong: #1d2721; --ink: #edf3ee; --muted: #a5b0a8; --line: #344139; --accent: #68bb8d; --accent-hover: #78c99c; --accent-soft: #203a2b; --danger: #ffaaa2; --danger-soft: #452824; --shadow: 0 24px 70px rgba(4, 10, 6, .3); }
-  button { color: #102218; background: var(--accent); }
+/* Theme Toggle Styles */
+.theme-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: var(--ink);
+  opacity: .7;
+  transition: opacity .18s ease, transform .12s ease, background-color .18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  min-height: auto;
+}
+.theme-toggle:hover {
+  opacity: 1;
+  background: var(--line);
+}
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+html[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+html[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+html[data-theme="light"] .theme-toggle .sun-icon { display: none; }
+html[data-theme="light"] .theme-toggle .moon-icon { display: block; }
+
+/* Dark Theme Variables */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #111713;
+  --surface: #171f1a;
+  --surface-strong: #1d2721;
+  --ink: #edf3ee;
+  --muted: #a5b0a8;
+  --line: #344139;
+  --accent: #68bb8d;
+  --accent-hover: #78c99c;
+  --accent-soft: #203a2b;
+  --danger: #ffaaa2;
+  --danger-soft: #452824;
+  --shadow: 0 24px 70px rgba(4, 10, 6, .3);
+}
+html[data-theme="dark"] button {
+  color: #102218;
+  background: var(--accent);
+}
+html[data-theme="dark"] button:hover {
+  background: var(--accent-hover);
 }
 @media (max-width: 820px) {
   main { padding-top: 38px; }
