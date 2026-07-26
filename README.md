@@ -21,9 +21,9 @@ The build downloads the `Ngọc Huyền (mới)` model into the ignored `models/
 Set `NGHITTS_VOICE` during the build to package another catalog voice instead.
 
 ```bash
-curl -X POST http://localhost:3000/v1/audio/speech \
+curl -X POST https://hiiu-tts.netlify.app/v1/audio/speech \
   -H 'Content-Type: application/json' \
-  -d '{"model":"default","input":"Xin chào Việt Nam!","speed":1,"response_format":"wav"}' \
+  -d '{"model":"Ngọc Huyền (mới)","input":"Xin chào Việt Nam!","speed":1,"response_format":"wav"}' \
   --output speech.wav
 ```
 

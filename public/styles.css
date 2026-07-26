@@ -89,17 +89,17 @@ audio { width: 100%; }
 .endpoint code { color: var(--ink); font-size: 11px; }
 
 .documentation { margin-top: 104px; }
-.docs-intro { max-width: 680px; }
+.docs-intro { max-width: 100%; }
 .docs-intro h2 { font-size: clamp(32px, 4vw, 48px); }
 .docs-intro > p:last-child { margin: 17px 0 0; color: var(--muted); line-height: 1.6; }
 .docs-nav { position: sticky; top: 12px; z-index: 1; display: flex; gap: 6px; width: fit-content; margin: 34px 0 0; padding: 5px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--page) 88%, transparent); backdrop-filter: blur(14px); }
 .docs-nav a { padding: 9px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 700; }
 .docs-nav a:hover, .docs-nav a:focus-visible { color: var(--accent); background: var(--accent-soft); outline: none; }
-.docs-body { max-width: 920px; margin-top: 48px; }
+.docs-body { max-width: 100%; margin-top: 48px; }
 .doc-section { scroll-margin-top: 80px; padding: 46px 0; border-top: 1px solid var(--line); }
 .doc-section h3 { margin: 0; font-size: 26px; letter-spacing: -.035em; }
 .doc-section h4 { margin: 0 0 8px; font-size: 15px; }
-.doc-section > p, .response-grid p { max-width: 690px; margin: 13px 0 22px; color: var(--muted); line-height: 1.6; }
+.doc-section > p, .response-grid p { max-width: 100%; margin: 13px 0 22px; color: var(--muted); line-height: 1.6; }
 .doc-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; }
 .doc-heading > code { color: var(--accent); font-size: 12px; white-space: nowrap; }
 pre { margin: 20px 0 0; padding: 19px 21px; overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 12px/1.65 ui-monospace, "SFMono-Regular", Consolas, monospace; }
