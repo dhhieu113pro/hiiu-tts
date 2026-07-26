@@ -182,7 +182,7 @@
   }' \
   --output speech.wav</code></pre>
             <div class="parameter-grid" aria-label="Speech request fields">
-              <div><code>input</code><strong>string, required</strong><p>Text to synthesize. Maximum 500 characters in this console to prevent timeout.</p></div>
+              <div><code>input</code><strong>string, required</strong><p>Text to synthesize. Maximum limit is 500 characters per request in the API to prevent serverless timeouts.</p></div>
               <div><code>model</code><strong>string</strong><p>Any of the 20 model names returned by <code>GET /v1/tts/models</code> (e.g. <code>Ban Mai</code>).</p></div>
               <div><code>speed</code><strong>number</strong><p>Playback speed from 0.25 to 4.0. Default is 1.0.</p></div>
               <div><code>response_format</code><strong>string</strong><p><code>wav</code> or headerless 16-bit mono <code>pcm</code>.</p></div>

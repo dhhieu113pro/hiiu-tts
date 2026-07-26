@@ -84,6 +84,7 @@ function speakerId(value: string | number | undefined, config: VoiceConfig): num
 
 export async function synthesize(request: SpeechRequest): Promise<{ data: Uint8Array; type: string }> {
   if (!request.input?.trim()) throw new Error("input must not be empty");
+  if (request.input.length > 500) throw new Error("input must not exceed 500 characters");
   const speed = request.speed ?? 1;
   if (speed < 0.25 || speed > 4) throw new Error("speed must be between 0.25 and 4.0");
 
