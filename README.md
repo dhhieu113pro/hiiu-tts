@@ -45,4 +45,11 @@ curl -X POST https://hiiu-tts.vercel.app/v1/audio/speech \
 
 ## Deployment
 
-Deploy directly to Netlify by linking your repository. The `netlify.toml` file will automatically run the build, output files to `public/`, and direct endpoints to serverless functions under `netlify/functions/`.
+Deploy directly to **Vercel** or **Netlify** by linking your repository.
+
+- **Vercel:** Configured via `vercel.json`. Run `npx vercel --prod` to deploy.
+- **Netlify:** Configured via `netlify.toml`. Push to `main` to trigger the build.
+
+## Acknowledgements
+
+Special thanks to [NghiTTS](https://github.com/nghimestudio/nghitts) for the open-source Vietnamese speech synthesis models and the eSpeak phonemizer backend engine.
