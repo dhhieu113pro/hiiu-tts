@@ -50,10 +50,10 @@
           <div class="field text-field">
             <div class="label-row">
               <label for="input">Text</label>
-              <span id="character-count">0 / 500</span>
+              <span id="character-count">0 characters</span>
             </div>
-            <textarea id="input" name="input" maxlength="500" rows="7" required>Xin chào Việt Nam! Hôm nay là một ngày đẹp trời.</textarea>
-            <p class="helper">Vietnamese text works best. Longer input takes more time to synthesize.</p>
+            <textarea id="input" name="input" rows="7" required>Xin chào Việt Nam! Hôm nay là một ngày đẹp trời.</textarea>
+            <p class="helper">Vietnamese text works best. Long text is automatically chunked and processed without timeouts.</p>
           </div>
 
           <div class="controls">
@@ -177,7 +177,6 @@
   -d '{
     "model": "Ngọc Huyền (mới)",
     "input": "Xin chào Việt Nam!",
-    "voice": "0",
     "speed": 1.0,
     "response_format": "wav"
   }' \
@@ -187,7 +186,6 @@
               <div><code>model</code><strong>string</strong><p>Any of the 20 model names returned by <code>GET /v1/tts/models</code> (e.g. <code>Ban Mai</code>).</p></div>
               <div><code>speed</code><strong>number</strong><p>Playback speed from 0.25 to 4.0. Default is 1.0.</p></div>
               <div><code>response_format</code><strong>string</strong><p><code>wav</code> or headerless 16-bit mono <code>pcm</code>.</p></div>
-              <div><code>voice</code><strong>string or number</strong><p>Speaker ID for multi-speaker models. Use <code>0</code> here.</p></div>
             </div>
             <p class="note">Long text is split into phrase-sized chunks. The API inserts a short pause between chunks and a final tail so high-speed output does not end abruptly.</p>
           </article>

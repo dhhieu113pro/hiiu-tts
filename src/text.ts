@@ -32,6 +32,17 @@ export function normalizeVietnamese(input: string): string {
     .replace(/https?:\/\/\S+|www\.\S+|\S+@\S+\.\S+/giu, "")
     .replace(/&/g, " và ").replace(/@/g, " a còng ").replace(/#/g, " thăng ")
     .replace(/[\*_~`^]/g, " ").replace(/[–—−]/g, "-").replace(/…/g, "...")
+    .replace(/(\d+(?:[.,]\d+)?)\s*:\s*(\d+(?:[.,]\d+)?)/g, (_, left, right) => {
+      const convert = (numStr: string) => {
+        const normalized = numStr.replace(",", ".");
+        if (normalized.includes(".")) {
+          const [whole, decimal] = normalized.split(".");
+          return `${numberToWords(+whole)} phẩy ${numberToWords(+decimal)}`;
+        }
+        return numberToWords(+normalized);
+      };
+      return `${convert(left)} chia ${convert(right)}`;
+    })
     .replace(/(\d+)[,.](\d+)\s*%/g, (_, whole, decimal) => `${numberToWords(+whole)} phẩy ${numberToWords(+decimal)} phần trăm`)
     .replace(/(\d+)\s*%/g, (_, number) => `${numberToWords(+number)} phần trăm`)
     .replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/g, (_, day, month, year) => `ngày ${numberToWords(+day)} tháng ${numberToWords(+month)} năm ${numberToWords(+year)}`)

@@ -42,3 +42,9 @@ test("encodes a valid mono PCM WAV header", () => {
   assert.equal(new DataView(wav.buffer).getUint32(24, true), 22050);
   assert.equal(wav.length, 50);
 });
+
+test("normalizes ratios to words", () => {
+  assert.equal(normalizeVietnamese("tỷ lệ 4:3"), "tỷ lệ bốn chia ba");
+  assert.equal(normalizeVietnamese("chuẩn 19.5:9"), "chuẩn mười chín phẩy năm chia chín");
+  assert.equal(normalizeVietnamese("chuẩn 19,5:9"), "chuẩn mười chín phẩy năm chia chín");
+});

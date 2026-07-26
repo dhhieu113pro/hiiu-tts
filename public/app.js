@@ -110,11 +110,77 @@ function stopCurrentDemo() {
   }
 }
 
-function updateCount() { count.textContent = `${input.value.length.toLocaleString()} / 500`; }
+function updateCount() { count.textContent = `${input.value.length.toLocaleString()} characters`; }
 function updateSpeed() { speedValue.textContent = `${Number(speed.value).toFixed(1)}x`; }
 input.addEventListener("input", updateCount);
 speed.addEventListener("input", updateSpeed);
 updateCount();
+
+function splitTextIntoChunks(text, maxChunkLen = 300) {
+  const paragraphs = text.split(/\n+/);
+  const chunks = [];
+
+  for (let paragraph of paragraphs) {
+    paragraph = paragraph.trim();
+    if (!paragraph) continue;
+
+    if (paragraph.length <= maxChunkLen) {
+      chunks.push(paragraph);
+      continue;
+    }
+
+    const sentences = paragraph.split(/(?<=[.!?])\s+/);
+    let currentChunk = "";
+
+    for (let sentence of sentences) {
+      if ((currentChunk + sentence).length <= maxChunkLen) {
+        currentChunk += (currentChunk ? " " : "") + sentence;
+      } else {
+        if (currentChunk) chunks.push(currentChunk);
+        
+        if (sentence.length > maxChunkLen) {
+          const words = sentence.split(/\s+/);
+          let wordChunk = "";
+          for (let word of words) {
+            if ((wordChunk + word).length <= maxChunkLen) {
+              wordChunk += (wordChunk ? " " : "") + word;
+            } else {
+              if (wordChunk) chunks.push(wordChunk);
+              wordChunk = word;
+            }
+          }
+          currentChunk = wordChunk;
+        } else {
+          currentChunk = sentence;
+        }
+      }
+    }
+    if (currentChunk) chunks.push(currentChunk);
+  }
+
+  return chunks;
+}
+
+function mergeWavFiles(wavBuffers) {
+  if (wavBuffers.length === 0) return null;
+  if (wavBuffers.length === 1) return new Blob([wavBuffers[0]], { type: "audio/wav" });
+
+  const header = new Uint8Array(wavBuffers[0].slice(0, 44));
+
+  const pcmChunks = [];
+  let totalPcmLength = 0;
+  for (const buffer of wavBuffers) {
+    const pcm = buffer.slice(44);
+    pcmChunks.push(pcm);
+    totalPcmLength += pcm.byteLength;
+  }
+
+  const view = new DataView(header.buffer);
+  view.setUint32(4, totalPcmLength + 36, true);
+  view.setUint32(40, totalPcmLength, true);
+
+  return new Blob([header, ...pcmChunks], { type: "audio/wav" });
+}
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
@@ -128,27 +194,51 @@ form.addEventListener("submit", async event => {
   const started = performance.now();
 
   try {
-    const response = await fetch("/v1/audio/speech", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: document.querySelector("#model").value,
-        input: input.value,
-        speed: Number(speed.value),
-        response_format: format
-      })
-    });
-    if (!response.ok) {
-      const body = await response.json().catch(() => null);
-      throw new Error(body?.error?.message || `Request failed with status ${response.status}`);
+    const text = input.value.trim();
+    if (!text) throw new Error("Input text is empty");
+
+    // Chunk size is set to 300 to balance speed, synthesis quality and timeout limits
+    const chunks = splitTextIntoChunks(text, 300);
+    const wavBuffers = [];
+
+    for (let i = 0; i < chunks.length; i++) {
+      if (chunks.length > 1) {
+        resultTitle.textContent = `Generating audio (part ${i + 1} of ${chunks.length})`;
+      }
+      
+      const response = await fetch("/v1/audio/speech", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: document.querySelector("#model").value,
+          input: chunks[i],
+          speed: Number(speed.value),
+          response_format: format
+        })
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error?.message || `Request for part ${i + 1} failed with status ${response.status}`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      wavBuffers.push(arrayBuffer);
     }
 
-    const blob = await response.blob();
+    let blob;
+    if (format === "wav") {
+      blob = mergeWavFiles(wavBuffers);
+    } else {
+      // PCM is raw headerless audio, so just concatenate all parts
+      blob = new Blob(wavBuffers, { type: "audio/pcm" });
+    }
+
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     audioUrl = URL.createObjectURL(blob);
     audio.src = audioUrl;
     download.href = audioUrl;
-    download.download = `nghitts.${format}`;
+    download.download = `hiiu-tts.${format}`;
     fileInfo.textContent = `${format.toUpperCase()}  ${formatBytes(blob.size)}`;
     timing.textContent = `${((performance.now() - started) / 1000).toFixed(1)}s`;
     timing.hidden = false;
